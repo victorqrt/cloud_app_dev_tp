@@ -8,3 +8,5 @@ This repo contains the cloud app development TP for Victor Querette and Matthieu
 Our chosen dataset is https://relational.fit.cvut.cz/dataset/BasketballWomen.
 
 `./get_tables.sh` will dump this DB into CSV files.
+
+Our mongo cluster can be accessed with `mongo "mongodb+srv://cloudmlvq-r4zfj.mongodb.net/test" --username Gentoo --password installgentoo`
