@@ -1,1 +1,3 @@
-*.csv
+scripts/*csv
+app/env/*
+app/__pycache__
