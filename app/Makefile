@@ -5,5 +5,5 @@ env:
 	virtualenv env
 	. env/bin/activate && pip install flask
 
-clean: env
-	rm -fr env
+clean:
+	[ -d env ] && rm -fr env
