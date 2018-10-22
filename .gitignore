@@ -1,3 +1,4 @@
 scripts/*csv
 app/env/*
 app/__pycache__
+.vscode/*
