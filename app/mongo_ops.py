@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from bson.json_util import dumps, loads, RELAXED_JSON_OPTIONS
+from bson.json_util import dumps, loads
 
 class MongoOps:
 
