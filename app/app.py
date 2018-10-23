@@ -6,7 +6,11 @@ mops = mongo_ops.MongoOps()
 
 @app.route("/", strict_slashes=False)
 def main_route():
-    return "wip"
+    return app.send_static_file("index.html")
+
+########################
+# API endpoints routes #
+########################
 
 @app.route("/api/db/<db>", strict_slashes=False)
 @app.route("/api/db/<db>/<coll>", strict_slashes=False)
