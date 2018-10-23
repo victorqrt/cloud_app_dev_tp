@@ -285,7 +285,6 @@ section {
 @media (max-width: 991px) {
     .page-container {
         position: relative;
-        top: 88px;
         padding-left: 0;
     }
 }
@@ -307,7 +306,7 @@ section {
 }
 
 .main-content {
-    padding-top: 116px;
+    padding-top: 30px;
     min-height: 100vh;
 }
 
