@@ -5,7 +5,7 @@ class MongoOps:
 
     def __init__(self):
         # Auth in clear because who cares :|
-        # The db build is automated anyway ( see ../scripts)
+        # The db build is automated anyway (see ../scripts)
         self.client = MongoClient("mongodb+srv://Gentoo:installgentoo@cloudmlvq-r4zfj.mongodb.net/test")
 
     def get_db_colls(self, db):

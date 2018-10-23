@@ -8,6 +8,16 @@ mops = mongo_ops.MongoOps()
 def main_route():
     return app.send_static_file("index.html")
 
+@app.route("/chart", strict_slashes=False)
+def chart_route():
+    return app.send_static_file("chart.html")
+
+########################
+# API endpoints routes #
+########################
+
+@app.route("/api/db/<db>", strict_slashes=False)
+@app.route("/api/db/<db>/<coll>", strict_slashes=False)
 ########################
 # API endpoints routes #
 ########################
