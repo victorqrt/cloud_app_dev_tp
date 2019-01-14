@@ -6,5 +6,5 @@ env:
 	. env/bin/activate && pip install flask pymongo dnspython
 
 clean:
-	rm -fr __pycache__
-	[ -d env ] && rm -fr env
+	rm -fr env app/__pycache__ app/*.pyc
+	chmod -x run

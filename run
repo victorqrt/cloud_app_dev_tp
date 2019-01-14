@@ -1,0 +1,29 @@
+#!/bin/bash
+
+function usage {
+    echo "Usage: ./run (webapp | setup-db)"
+    exit 127
+}
+
+function setup_db {
+    echo "[ ] Downloading the SQL tables:"
+
+    TABLES=(awards_players players_teams coaches draft series_post teams_post teams players)
+    CONNECT='mysql -u guest -p'relational' -h relational.fit.cvut.cz -P 3306 -D Basketball_women'
+
+    for t in ${TABLES[@]}; do
+        echo "[ ] Downloading CSV dump of table $t..."
+        $CONNECT -e "select * from $t;" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > $t.csv
+
+        echo "[ ] Pushing table $t to mongoDB cluster as a new collection..."
+        mongoimport --host CloudMLVQ-shard-0/cloudmlvq-shard-00-00-r4zfj.mongodb.net:27017,cloudmlvq-shard-00-01-r4zfj.mongodb.net:27017,cloudmlvq-shard-00-02-r4zfj.mongodb.net:27017 --ssl --username Gentoo --password installgentoo --authenticationDatabase admin --db imports --collection $t --type CSV --file $t.csv --headerline
+    done
+
+    echo "[+] Done."
+}
+
+case $1 in
+    webapp) . env/bin/activate && FLASK_APP=app/app.py flask run --port=8080 --host=0.0.0.0;;
+    setup-db) setup_db;;
+    *) usage;;
+esac
