@@ -6,8 +6,27 @@ class MongoOps:
 
     def __init__(self):
         # Auth in clear because who cares :|
-        # The db build is automated anyway (see ../scripts)
+        # The db build is automated anyway (see ../run)
         self.client = MongoClient("mongodb+srv://Gentoo:installgentoo@cloudmlvq-r4zfj.mongodb.net/test")
+
+        if "data" not in self.client.list_database_names(): # Actual conversion to a nosql schema happens now
+            print("[ ] First run: preparing the database...")
+
+            # New collection: data.teams
+            # Each document has the team ID as string field, and all the team characteristics (by year) as a list
+            teams = list(self.client["imports"]["teams"].find())
+            all_teamIDs = set(map(lambda x: x["tmID"], teams))
+
+            new_teams = []
+            for i in all_teamIDs:
+                new_teams.append({
+                    "team_id": i,
+                    "characteristics": list(filter(lambda x: x["tmID"] == i, teams))
+                })
+
+            self.client["data"]["teams"].insert_many(new_teams)
+
+            print("[+] Done, starting the webapp.")
 
     def get_db_colls(self):
         return self.client["imports"].collection_names()

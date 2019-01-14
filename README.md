@@ -15,14 +15,13 @@ Installation
     - python (pip, virtualenv)
     - bash
     - make
+    - In order to build the db, you will need the mongoimport and mysql (both client only are enough) cli tools.
 
 - To prepare the execution environment and its dependencies, simply run `make` in the app subfolder of the repo.
-
-- You will then need to fetch the sql dumps from the database we chose. Running `./scripts/get_tables.sh` will get those as CSV files, one per table.
-
-- `./scripts/import_to_cluster.sh` will push the tables to a mongoDB "import" collection on the dedicated mongo atlas cluster.
 
 Usage
 -----
 
-Once the steps above performed, go into the `app` folder and `./run` to start the webapp :)
+The first thing to do is to build the db. This is automated and can be done by running `./run setup-db`.
+
+Once this succeeds, you can start the webapp by using `./run webapp`. It can be accessed on port 8080 of your machine.
