@@ -6,25 +6,58 @@ class MongoOps:
 
     def __init__(self):
         # Auth in clear because who cares :|
-        # The db build is automated anyway (see ../run)
-        self.client = MongoClient("mongodb+srv://Gentoo:installgentoo@cloudmlvq-r4zfj.mongodb.net/test")
+        # The db build is automated (see ../run) and the user has no high privileges anyway
+        self.client = MongoClient("mongodb+srv://Gentoo:installgentoo@cloudmlvq-r4zfj.mongodb.net/")
 
         if "data" not in self.client.list_database_names(): # Actual conversion to a nosql schema happens now
-            print("[ ] First run: preparing the database...")
+            print("[ ] First run: preparing the database (may take some time)...")
 
             # New collection: data.teams
-            # Each document has the team ID as string field, and all the team characteristics (by year) as a list
+            # Each document has the team ID as string field, and all the team variants (by year) as a list
+            print("    [ ] Creating data.teams from the imports...")
+
             teams = list(self.client["imports"]["teams"].find())
             all_teamIDs = set(map(lambda x: x["tmID"], teams))
 
-            new_teams = []
-            for i in all_teamIDs:
-                new_teams.append({
-                    "team_id": i,
-                    "characteristics": list(filter(lambda x: x["tmID"] == i, teams))
-                })
+            self.client["data"]["teams"].insert_many(
+                map(
+                    lambda _id: {
+                        "team_id": _id,
+                        "variants_by_year": list(filter(lambda x: x["tmID"] == _id, teams))
+                    },
+                    all_teamIDs
+                )
+            )
 
-            self.client["data"]["teams"].insert_many(new_teams)
+            # New collection: data.players
+            # Each player has a list of the teams he played on
+            print("    [ ] Creating data.players from the imports...")
+
+            players = list(self.client["imports"]["players"].find())
+            players_teams = list(self.client["imports"]["players_teams"].find()) # To map player to team variant based on team ID and year
+            all_playerIDs = set(map(lambda x: x["playerID"], players_teams))
+
+            self.client["data"]["players"].insert_many(players)
+
+            map(
+                lambda _id: self.client["data"]["players"].update_one(
+                    {"bioID": _id},
+                    {
+                        "$set": {
+                            "teams": list(
+                                map(
+                                    lambda x: list(filter(
+                                        lambda y: y["tmID"] == x["tmID"] and y["year"] == x["year"],
+                                        teams
+                                    ))[0],
+                                    filter(lambda t: t["playerID"] == _id, players_teams)
+                                )
+                            )
+                        }
+                    }
+                ),
+                all_playerIDs
+            )
 
             print("[+] Done, starting the webapp.")
 
