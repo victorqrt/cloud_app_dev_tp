@@ -1,5 +1,5 @@
 import mongo_ops
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 mops = mongo_ops.MongoOps()
@@ -31,3 +31,12 @@ def db_route(coll=None):
 @app.route("/api/players", strict_slashes=False)
 def player_info_route():
     return jsonify(mops.get_full_players_documents())
+
+# The simple interrogations
+
+# 1
+@app.route("/api/playoff_palmares", strict_slashes=False)
+def palmares_route():
+    if "teamid" not in request.args:
+        return jsonify([])
+    return jsonify(mops.team_playoff_palmares(request.args["teamid"]))

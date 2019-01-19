@@ -78,9 +78,27 @@ class MongoOps:
                     "localField": "playerID",
                     "foreignField": "bioID",
                     "as": "player"
-                    }
-                }]))
-            )
+                }
+            }]))
+        )
+
+    # The simple queries
+
+    # 1
+    def team_playoff_palmares(self, team):
+        team_object = self.client["data"]["teams"].find_one({"team_id": team})
+
+        try:
+            return deserialize_oids({
+                "playoffs_count": len(list(filter(lambda t: t["playoff"] == "Y", team_object["variants_by_year"]))),
+                "palmares": list(map(
+                    lambda t: {"year": t["year"], "playoff": t["playoff"]},
+                    team_object["variants_by_year"]
+                ))
+            })
+
+        except:
+            return []
 
 def deserialize_oids(document): # Flask cannot serialize "ObjectID" type fields, so we recursively stringify them
     if isinstance(document, list):
@@ -88,7 +106,8 @@ def deserialize_oids(document): # Flask cannot serialize "ObjectID" type fields,
             deserialize_oids(e)
 
     elif isinstance(document, dict):
-        document["_id"] = str(document["_id"])
+        if "_id" in document:
+            document["_id"] = str(document["_id"])
         for k,v in document.items():
             deserialize_oids(v)
 

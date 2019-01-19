@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage {
-    echo "Usage: ./run (webapp | setup-db)"
+    echo "Usage: $0 (setup-db | webapp)"
     exit 127
 }
 
