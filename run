@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage {
-    echo "Usage: $0 (setup-db | webapp)"
+    echo "Usage: $0 (setup-db | webapp | clean-db)"
     exit 127
 }
 
@@ -26,5 +26,6 @@ function setup_db {
 case $1 in
     webapp) . env/bin/activate && FLASK_APP=app/app.py flask run --port=8080 --host=0.0.0.0;;
     setup-db) setup_db;;
+    clean-db) . env/bin/activate && python app/clean_db.py;;
     *) usage;;
 esac
