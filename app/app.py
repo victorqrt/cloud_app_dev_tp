@@ -20,18 +20,6 @@ def chart_route():
 # API endpoints routes #
 ########################
 
-@app.route("/api/db", strict_slashes=False)
-@app.route("/api/db/<coll>", strict_slashes=False)
-def db_route(coll=None):
-    if coll is None:
-        return jsonify(mops.get_db_colls())
-    else:
-        return jsonify(mops.get_raw_coll(coll, pop_oid=True))
-
-@app.route("/api/players", strict_slashes=False)
-def player_info_route():
-    return jsonify(mops.get_full_players_documents())
-
 # The simple interrogations
 
 # 1
@@ -40,3 +28,18 @@ def palmares_route():
     if "teamid" not in request.args:
         return jsonify([])
     return jsonify(mops.team_playoff_palmares(request.args["teamid"]))
+
+
+# 2
+@app.route("/api/coach_history", strict_slashes=False)
+def coach_history_route():
+    if "coachid" not in request.args:
+        return jsonify([])
+    return jsonify(mops.coach_history(request.args["coachid"]))
+
+# 3
+@app.route("/api/player_coaches", strict_slashes=False)
+def player_coaches_route():
+    if "playerid" not in request.args:
+        return jsonify([])
+    return jsonify(mops.player_had_coaches(request.args["playerid"]))

@@ -9,29 +9,47 @@ class MongoOps:
         # The db build is automated (see ../run) and the user has no high privileges anyway
         self.client = MongoClient("mongodb+srv://Gentoo:installgentoo@cloudmlvq-r4zfj.mongodb.net/")
 
-        if "data" not in self.client.list_database_names(): # Actual conversion to a nosql schema happens now
+        if "data" not in self.client.list_database_names():
+            # Actual conversion to a nosql schema happens now
             print("[ ] First run: preparing the database (may take some time)...")
 
-            # New collection: data.teams
-            # Each document has the team ID as string field, and all the team variants (by year) as a list
             print("    [ ] Creating data.teams from the imports...")
+
+            # New collection: data.teams
+            # We add to each document:
+            #   - The team ID as string field, and all the team variants (by year) as a list
+            #   - To each of those variants, the coach document if found
 
             teams = list(self.client["imports"]["teams"].find())
             all_teamIDs = set(map(lambda x: x["tmID"], teams))
+            coaches = list(self.client["imports"]["coaches"].find())
 
             self.client["data"]["teams"].insert_many(
                 map(
                     lambda _id: {
                         "team_id": _id,
-                        "variants_by_year": list(filter(lambda x: x["tmID"] == _id, teams))
+
+                        # We want to add to the team document the embedded coach document
+
+                        "variants_by_year": map(
+
+                            # The update method on python dicts has a none return value, hence the "or e" to effectively return e after
+                            # modification. Not very functionnal as we embed a side effect (we're modifying e by reference), but works.
+
+                            lambda e: e.update(
+                                {"coach": list(filter(lambda _e: _e["tmID"] == e["tmID"] and _e["year"] == e["year"], coaches))[0]}
+                            ) or e,
+                            list(filter(lambda x: x["tmID"] == _id, teams))
+                        )
                     },
                     all_teamIDs
                 )
             )
 
-            # New collection: data.players
-            # Each player has a list of the teams he played on
             print("    [ ] Creating data.players from the imports...")
+
+            # New collection: data.players
+            # We add to each document a list of the teams she has played on
 
             players = list(self.client["imports"]["players"].find())
             players_teams = list(self.client["imports"]["players_teams"].find()) # To map player to team variant based on team ID and year
@@ -61,26 +79,9 @@ class MongoOps:
 
             print("[+] Done, starting the webapp.")
 
-    def get_db_colls(self):
-        return self.client["imports"].collection_names()
-
-    def get_raw_coll(self, coll, pop_oid=False):
-        res = list(self.client["imports"][coll].find())
-        if pop_oid:
-            res = deserialize_oids(res)
-        return res
-
-    def get_full_players_documents(self):
-        return deserialize_oids(
-            list(self.client["imports"]["players_teams"].aggregate([{
-                "$lookup": {
-                    "from": "players",
-                    "localField": "playerID",
-                    "foreignField": "bioID",
-                    "as": "player"
-                }
-            }]))
-        )
+    ###########
+    # Queries #
+    ###########
 
     # The simple queries
 
@@ -100,7 +101,71 @@ class MongoOps:
         except:
             return []
 
-def deserialize_oids(document): # Flask cannot serialize "ObjectID" type fields, so we recursively stringify them
+    # 2
+    def coach_history(self, coach):
+        try:
+            return list(
+                self.client["data"]["teams"].aggregate([
+                    {
+                        "$unwind": "$variants_by_year"
+                    },
+                    {
+                        "$match": {
+                            "variants_by_year.coach.coachID": coach
+                        }
+                    },
+                    {
+                        "$project": {
+                            "_id": 0,
+                            "teamID": "$variants_by_year.coach.tmID",
+                            "year": "$variants_by_year.coach.year"
+                        }
+                    },
+                    {
+                        "$sort": {
+                            "year": 1
+                        }
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+    # 3
+    def player_had_coaches(self, player):
+        try:
+            return list(
+                self.client["data"]["players"].aggregate([
+                    {
+                        "$match": {
+                            "bioID": player
+                        }
+                    },
+                    {
+                        "$unwind": "$teams"
+                    },
+                    {
+                        "$project": {
+                            "_id": 0,
+                            "teamID": "$teams.tmID",
+                            "coachID": "$teams.coach.coachID",
+                            "year": "$teams.year"
+                        }
+                    },
+                    {
+                        "$sort": {
+                            "year": 1
+                        }
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+# Flask cannot serialize "ObjectID" type fields, so we recursively stringify them
+def deserialize_oids(document):
     if isinstance(document, list):
         for e in document:
             deserialize_oids(e)
