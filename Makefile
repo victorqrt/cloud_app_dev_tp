@@ -2,7 +2,7 @@ all: env
 	chmod +x run
 
 env:
-	virtualenv env
+	virtualenv -p python3 env
 	. env/bin/activate && pip install flask pymongo dnspython
 
 clean:
