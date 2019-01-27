@@ -284,7 +284,7 @@ class MongoOps:
     def _3points_rate_by_year(self, year):
         try:
             return list(
-                db.client["teams"].map_reduce('''
+                self.client["teams"].map_reduce('''
                     function() {
                         var attended = 0;
                         var marked = 0;
@@ -308,6 +308,32 @@ class MongoOps:
                     {out: {inline: 1}}
                 '''.format(year)
                 )
+            )
+
+        except:
+            return []
+
+    ##############################################
+    # Miscellaneous requests (for the front-end) #
+    ##############################################
+
+    def coach_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["coaches"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "coach_id": "$coachID", "coach_name": "$fullName" }
+                        }
+                    }#,
+                    #{
+                    #    "$project": {
+                    #        "_id": 0,
+                    #        "coach_id": "$_id",
+                    #        "coach_name": "$fullName"
+                    #    }
+                    #}
+                ])
             )
 
         except:
