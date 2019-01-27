@@ -135,6 +135,7 @@ class MongoOps:
                     {
                         "$project": {
                             "_id": 0,
+                            "team_name": "$variants_by_year.name",
                             "teamID": "$variants_by_year.coach.tmID",
                             "year": "$variants_by_year.coach.year"
                         }
