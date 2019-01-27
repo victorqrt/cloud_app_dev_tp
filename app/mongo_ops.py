@@ -314,6 +314,24 @@ class MongoOps:
         except:
             return []
 
+    # The administrator info request
+
+    def sys_info_request(self):
+        try:
+            return {
+                "index_information": {
+                    "players": self.client["data"]["players"].index_information(),
+                     "teams": self.client["data"]["teams"].index_information()
+                },
+                "document_count_by_collection": {
+                    "players": self.client["data"]["players"].count_documents({}),
+                    "teams": self.client["data"]["teams"].count_documents({})
+                }
+            }
+
+        except:
+            return {}
+
     ##############################################
     # Miscellaneous requests (for the front-end) #
     ##############################################
