@@ -43,3 +43,19 @@ def player_coaches_route():
     if "playerid" not in request.args:
         return jsonify([])
     return jsonify(mops.player_had_coaches(request.args["playerid"]))
+
+# 4
+@app.route("/api/player_playoffs", strict_slashes=False)
+def player_playoffs_route():
+    if "playerid" not in request.args:
+        return jsonify([])
+    return jsonify(mops.player_playoff_palmares(request.args["playerid"]))
+
+# The heavy ones
+
+# 1
+@app.route("/api/coach_has_trained", strict_slashes=False)
+def coach_players_trained_route():
+    if "coachid" not in request.args:
+        return jsonify([])
+    return jsonify(mops.coach_all_trained(request.args["coachid"]))
