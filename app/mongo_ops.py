@@ -135,6 +135,7 @@ class MongoOps:
                     {
                         "$project": {
                             "_id": 0,
+                            "team_name": "$variants_by_year.name",
                             "teamID": "$variants_by_year.coach.tmID",
                             "year": "$variants_by_year.coach.year"
                         }
@@ -168,6 +169,7 @@ class MongoOps:
                             "_id": 0,
                             "teamID": "$teams.tmID",
                             "coachID": "$teams.coach.coachID",
+                            "coach_name": "$teams.coach.fullName",
                             "year": "$teams.year"
                         }
                     },
@@ -252,7 +254,7 @@ class MongoOps:
                     },
                     {
                         "$group": {
-                            "_id": "$player_id",
+                            "_id": { "player_name": "$player_name", "player_id": "$player_id" },
                             "coached": {
                                 "$push": { "year": "$year", "team": "$team", "tmID": "$tmID" }
                             }
@@ -284,7 +286,7 @@ class MongoOps:
     def _3points_rate_by_year(self, year):
         try:
             return list(
-                db.client["teams"].map_reduce('''
+                self.client["teams"].map_reduce('''
                     function() {
                         var attended = 0;
                         var marked = 0;
@@ -308,6 +310,73 @@ class MongoOps:
                     {out: {inline: 1}}
                 '''.format(year)
                 )
+            )
+
+        except:
+            return []
+
+    # The administrator info request
+
+    def sys_info_request(self):
+        try:
+            return {
+                "index_information": {
+                    "players": self.client["data"]["players"].index_information(),
+                     "teams": self.client["data"]["teams"].index_information()
+                },
+                "document_count_by_collection": {
+                    "players": self.client["data"]["players"].count_documents({}),
+                    "teams": self.client["data"]["teams"].count_documents({})
+                }
+            }
+
+        except:
+            return {}
+
+    ##############################################
+    # Miscellaneous requests (for the front-end) #
+    ##############################################
+
+    def coach_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["coaches"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "coach_id": "$coachID", "coach_name": "$fullName" }
+                        }
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+    def team_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["teams"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "team_id": "$tmID", "team_name": "$name" }
+                        }
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+    def player_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["players"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "player_id": "$bioID", "player_name": "$fullGivenName" }
+                        }
+                    }
+                ])
             )
 
         except:

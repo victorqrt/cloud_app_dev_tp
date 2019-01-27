@@ -59,3 +59,24 @@ def coach_players_trained_route():
     if "coachid" not in request.args:
         return jsonify([])
     return jsonify(mops.coach_all_trained(request.args["coachid"]))
+
+# The administrator one
+
+@app.route("/api/db_info", strict_slashes=False)
+def db_info_route():
+    return jsonify(mops.sys_info_request())
+
+# Those routes are related to the front-end
+
+@app.route("/api/misc/coach_name_id_pairs", strict_slashes=False)
+def coach_name_id_pairs():
+    return jsonify(mops.coach_name_id_pairs())
+
+
+@app.route("/api/misc/team_name_id_pairs", strict_slashes=False)
+def team_name_id_pairs():
+    return jsonify(mops.team_name_id_pairs())
+
+@app.route("/api/misc/player_name_id_pairs", strict_slashes=False)
+def player_name_id_pairs():
+    return jsonify(mops.player_name_id_pairs())
