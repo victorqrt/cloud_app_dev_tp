@@ -13,7 +13,7 @@ function setup_db {
 
     for t in ${TABLES[@]}; do
         echo "[ ] Downloading CSV dump of table $t..."
-        $CONNECT -e "select * from $t;" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > $t.csv
+        $CONNECT -e "select * from $t;" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g;s/ *\"/\"/g;" > $t.csv
 
         echo "[ ] Pushing table $t to mongoDB cluster as a new collection..."
         mongoimport --host CloudMLVQ-shard-0/cloudmlvq-shard-00-00-r4zfj.mongodb.net:27017,cloudmlvq-shard-00-01-r4zfj.mongodb.net:27017,cloudmlvq-shard-00-02-r4zfj.mongodb.net:27017 --ssl --username Gentoo --password installgentoo --authenticationDatabase admin --db imports --collection $t --type CSV --file $t.csv --headerline > /dev/null 2>&1

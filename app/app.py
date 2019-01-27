@@ -65,3 +65,12 @@ def coach_players_trained_route():
 @app.route("/api/misc/coach_name_id_pairs", strict_slashes=False)
 def coach_name_id_pairs():
     return jsonify(mops.coach_name_id_pairs())
+
+
+@app.route("/api/misc/team_name_id_pairs", strict_slashes=False)
+def team_name_id_pairs():
+    return jsonify(mops.team_name_id_pairs())
+
+@app.route("/api/misc/player_name_id_pairs", strict_slashes=False)
+def player_name_id_pairs():
+    return jsonify(mops.player_name_id_pairs())

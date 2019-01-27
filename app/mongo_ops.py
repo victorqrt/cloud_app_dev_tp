@@ -325,14 +325,37 @@ class MongoOps:
                         "$group": {
                             "_id": { "coach_id": "$coachID", "coach_name": "$fullName" }
                         }
-                    }#,
-                    #{
-                    #    "$project": {
-                    #        "_id": 0,
-                    #        "coach_id": "$_id",
-                    #        "coach_name": "$fullName"
-                    #    }
-                    #}
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+    def team_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["teams"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "team_id": "$tmID", "team_name": "$name" }
+                        }
+                    }
+                ])
+            )
+
+        except:
+            return []
+
+    def player_name_id_pairs(self):
+        try:
+            return list(
+                self.client["imports"]["players"].aggregate([
+                    {
+                        "$group": {
+                            "_id": { "player_id": "$bioID", "player_name": "$fullGivenName" }
+                        }
+                    }
                 ])
             )
 
