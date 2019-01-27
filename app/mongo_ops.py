@@ -254,7 +254,7 @@ class MongoOps:
                     },
                     {
                         "$group": {
-                            "_id": "$player_id",
+                            "_id": { "player_name": "$player_name", "player_id": "$player_id" },
                             "coached": {
                                 "$push": { "year": "$year", "team": "$team", "tmID": "$tmID" }
                             }
