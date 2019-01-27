@@ -169,6 +169,7 @@ class MongoOps:
                             "_id": 0,
                             "teamID": "$teams.tmID",
                             "coachID": "$teams.coach.coachID",
+                            "coach_name": "$teams.coach.fullName",
                             "year": "$teams.year"
                         }
                     },
